@@ -70,16 +70,6 @@ const TARIFF_INFO = {
 
 const TARIFF_OPTIONS = Object.keys(TARIFF_INFO);
 
-const STRATEGY_OPTIONS = [
-  "Personal Brand Push",
-  "Product Push",
-  "AD Kampagnen",
-  "Test Reel Push",
-  "Organic Only Push",
-  "AD Only Push",
-  "Sonstige Vereinbarung"
-];
-
 const PLATFORMS = ["Instagram", "TikTok", "Facebook", "LinkedIn", "YouTube", "Pinterest"];
 const INVOICE_STATUS_OPTIONS = ["Bezahlt", "Offen", "Fällig"];
 
@@ -92,6 +82,13 @@ const parsePrice = (priceVal) => {
   const normalized = priceVal.replace(',', '.');
   const parsed = parseFloat(normalized);
   return isNaN(parsed) ? 0 : parsed;
+};
+
+// Helfer-Funktion, um Abstürze bei ungültigen Datumsangaben zu verhindern
+const isValidDate = (dateStr) => {
+  if (!dateStr) return false;
+  const d = new Date(dateStr);
+  return d instanceof Date && !isNaN(d);
 };
 
 // Logo Komponente
@@ -148,7 +145,7 @@ const App = () => {
           setError("Verbindung zur Datenbank fehlgeschlagen.");
         }
       } else {
-        const saved = localStorage.getItem('mydc_customers_v20');
+        const saved = localStorage.getItem('mydc_customers_v22'); // Version erhöht für Clean Start
         if (saved) {
             setCustomers(JSON.parse(saved));
         } else {
@@ -285,7 +282,7 @@ const App = () => {
             alert("Fehler beim Speichern in der Cloud: " + err.message);
         }
     } else {
-        localStorage.setItem('mydc_customers_v20', JSON.stringify(newCustomers));
+        localStorage.setItem('mydc_customers_v22', JSON.stringify(newCustomers));
     }
     
     resetForm();
@@ -300,7 +297,7 @@ const App = () => {
           if (db) {
               await deleteDoc(doc(db, "customers", id));
           } else {
-              localStorage.setItem('mydc_customers_v20', JSON.stringify(newCustomers));
+              localStorage.setItem('mydc_customers_v22', JSON.stringify(newCustomers));
           }
       }
   };
@@ -362,12 +359,6 @@ const App = () => {
           tarif: newTariff,
           tarifDescription: TARIFF_INFO[newTariff] || ""
       });
-  };
-
-  const formatDateTime = (dateTimeStr) => {
-    if (!dateTimeStr) return "Kein Termin vereinbart";
-    const dt = new Date(dateTimeStr);
-    return dt.toLocaleString('de-DE', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + " Uhr";
   };
 
   const getStatusColor = (status) => {
@@ -590,10 +581,10 @@ const App = () => {
                 {Object.entries(customers).map(([id, data]) => (
                 <div key={id} className={`bg-white p-5 rounded-[2rem] border transition-all flex justify-between items-center group shadow-sm ${editCustomer.id === id ? 'border-blue-500 ring-2 ring-blue-50' : 'border-slate-200 hover:border-slate-400'}`}>
                     <div className="flex-1 min-w-0 pr-4">
-                        <div className="flex items-center gap-2 mb-1"><span className={`w-2 h-2 rounded-full ${data.status === 'Aktiv' ? 'bg-emerald-500' : 'bg-slate-300'}`}></span><span className="font-bold text-slate-900 truncate">{data.company || data.name}</span><span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-mono">#{id}</span></div>
+                        <div className="flex items-center gap-2 mb-1"><span className={`w-2 h-2 rounded-full ${data.status === 'Aktiv' ? 'bg-emerald-500' : 'bg-slate-300'}`}></span><span className="font-bold text-slate-900 truncate">{data.company || data.name || "Unbekannt"}</span><span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-mono">#{id}</span></div>
                         <p className="text-[11px] text-slate-400 truncate font-medium">{data.tarif}</p>
                         <div className="flex gap-3 mt-2">
-                            {data.nextAppointment && <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">Dreh: {new Date(data.nextAppointment).toLocaleDateString()}</span>}
+                            {isValidDate(data.nextAppointment) && <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">Dreh: {new Date(data.nextAppointment).toLocaleDateString()}</span>}
                             {data.invoiceStatus && <span className={`text-[9px] font-bold px-2 py-1 rounded-md border ${getStatusColor(data.invoiceStatus)}`}>{data.invoiceStatus}</span>}
                         </div>
                     </div>
@@ -691,7 +682,7 @@ const App = () => {
         return (
           <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center gap-4 mb-6"><div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center"><Camera size={24}/></div><div><h3 className="text-2xl font-bold text-slate-900">Content & Termine</h3><p className="text-slate-500 text-sm">Planung und Produktion.</p></div></div>
-            {user.nextAppointment ? (
+            {isValidDate(user.nextAppointment) ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Geplanter Content (Links) */}
                 <div className="space-y-6">
@@ -773,7 +764,7 @@ const App = () => {
 
             <div className="mt-8">
                 <h4 className="font-bold text-lg mb-4 text-slate-900">Verfügbare Tarif-Modelle</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {Object.keys(TARIFF_INFO).filter(t => t !== user.tarif).map(t => (
                     <div 
                         key={t} 
@@ -895,7 +886,7 @@ const App = () => {
                   />
               </div>
               
-              <StatCard icon={<Clock size={24}/>} color="amber" label="Partnerschaft" value={user.startDatum ? new Date(user.startDatum).getFullYear() : new Date().getFullYear()} />
+              <StatCard icon={<Clock size={24}/>} color="amber" label="Partnerschaft" value={user.startDatum && isValidDate(user.startDatum) ? new Date(user.startDatum).getFullYear() : new Date().getFullYear()} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -908,7 +899,7 @@ const App = () => {
                   </div>
                   <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-blue-600 rounded-full blur-[100px] opacity-20"></div>
                 </div>
-                {user.nextAppointment && (
+                {isValidDate(user.nextAppointment) && (
                   <div onClick={() => setActiveTab('appointments')} className="bg-white border border-slate-200 p-6 rounded-[2.5rem] flex items-center justify-between cursor-pointer hover:border-emerald-500 transition-all group shadow-sm border-l-4 border-l-emerald-600">
                     <div className="flex items-center gap-5">
                       <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform"><Camera size={24}/></div>
