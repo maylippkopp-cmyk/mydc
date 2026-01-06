@@ -38,7 +38,7 @@ import {
 } from 'lucide-react';
 
 // --- KONFIGURATION ---
-// BITTE HIER DEINE FIREBASE DATEN EINTRAGEN (aus der Firebase Console)
+// Deine Firebase Daten (Bleiben erhalten)
 const firebaseConfig = {
   apiKey: "AIzaSyD5Tb2kC0uyZTvsh0vtjU-TXIADz5aTCmw",
   authDomain: "my-dc-dashboard.firebaseapp.com",
@@ -51,7 +51,7 @@ const firebaseConfig = {
 // Initialisiere Firebase nur, wenn Config vorhanden ist (verhindert Absturz in Vorschau ohne Keys)
 let db;
 try {
-  if (firebaseConfig.apiKey !== "DEIN_API_KEY_HIER") {
+  if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "DEIN_API_KEY_HIER") {
     const app = initializeApp(firebaseConfig);
     db = getFirestore(app);
   }
@@ -141,12 +141,10 @@ const App = () => {
           setError("Verbindung zur Datenbank fehlgeschlagen.");
         }
       } else {
-        // Fallback LocalStorage für Demo (falls keine Keys eingetragen sind)
         const saved = localStorage.getItem('mydc_customers_v14');
         if (saved) {
             setCustomers(JSON.parse(saved));
         } else {
-            // Default Demo User
             setCustomers({
                 "KD-1001": {
                     name: "Max Mustermann",
@@ -244,11 +242,9 @@ const App = () => {
         monat: new Date().toLocaleString('de-DE', { month: 'long', year: 'numeric' }) 
     };
 
-    // Optimistisches Update (UI sofort aktualisieren)
     const newCustomers = { ...customers, [editCustomer.id]: updatedData };
     setCustomers(newCustomers);
 
-    // Speichern
     if (db) {
         try {
             await setDoc(doc(db, "customers", editCustomer.id), updatedData);
@@ -478,11 +474,11 @@ const App = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-4">
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100"><label className="text-[10px] uppercase font-black text-slate-400 tracking-widest block mb-1">Unternehmen</label><p className="text-lg font-bold text-slate-900">{user.company || "Nicht hinterlegt"}</p></div>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100"><label className="text-[10px] uppercase font-black text-slate-400 tracking-widest block mb-1">Ansprechpartner</label><p className="text-lg font-bold text-slate-900">{user.name}</p></div>
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100"><label className="text-[10px] uppercase font-black text-slate-400 tracking-widest block mb-1">Ansprechpartner</label><p className="text-lg font-bold text-slate-900">{(user.name || "Kunde")}</p></div>
               </div>
               <div className="p-6 bg-slate-900 rounded-[2rem] text-white">
                 <h4 className="font-bold mb-4 flex items-center gap-2"><Globe size={18} className="text-blue-400"/> Betreute Kanäle</h4>
-                <div className="flex flex-wrap gap-2">{user.managedAccounts?.length > 0 ? user.managedAccounts.map(acc => (<span key={acc} className="px-4 py-2 bg-white/10 rounded-xl text-sm font-semibold border border-white/10">{acc}</span>)) : (<p className="text-slate-400 text-sm italic">Aktuell keine Kanäle hinterlegt.</p>)}</div>
+                <div className="flex flex-wrap gap-2">{(user.managedAccounts || []).length > 0 ? (user.managedAccounts || []).map(acc => (<span key={acc} className="px-4 py-2 bg-white/10 rounded-xl text-sm font-semibold border border-white/10">{acc}</span>)) : (<p className="text-slate-400 text-sm italic">Aktuell keine Kanäle hinterlegt.</p>)}</div>
               </div>
             </div>
           </div>
@@ -493,7 +489,7 @@ const App = () => {
             <div className="flex items-center gap-4 mb-4"><div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center"><Target size={24}/></div><div><h3 className="text-2xl font-bold text-slate-900">Strategie-Plan</h3><p className="text-slate-500 text-sm">Ihre aktuelle Marktausrichtung und Kampagnenfokus.</p></div></div>
             <div className="grid grid-cols-1 gap-3">
               {STRATEGY_OPTIONS.map((opt) => {
-                const isActive = user.strategies?.includes(opt);
+                const isActive = (user.strategies || []).includes(opt);
                 return (
                   <div key={opt} className={`p-6 rounded-[2rem] border-2 transition-all flex justify-between items-center ${isActive ? 'border-blue-600 bg-blue-50/50' : 'border-slate-50 opacity-40'}`}>
                     <div className="flex items-center gap-4"><div className={`w-4 h-4 rounded-full ${isActive ? 'bg-blue-600 shadow-[0_0_15px_rgba(37,99,235,0.4)]' : 'bg-slate-200'}`}></div><span className={`font-bold text-lg ${isActive ? 'text-slate-900' : 'text-slate-400'}`}>{opt}</span></div>
@@ -566,7 +562,7 @@ const App = () => {
           <div className="space-y-8 animate-in fade-in duration-500">
             <header className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                 <div>
-                    <h2 className="text-4xl font-black text-slate-900 leading-tight">Hallo, {user.name.split(' ')[0]}</h2>
+                    <h2 className="text-4xl font-black text-slate-900 leading-tight">Hallo, {(user.name || "Kunde").split(' ')[0]}</h2>
                     <div className="flex gap-2 mt-2">
                         <span className="text-[10px] font-black text-slate-400 px-3 py-1.5 bg-white rounded-lg border border-slate-200 uppercase tracking-widest">Kunden-ID: {user.id}</span>
                         {user.company && <span className="text-[10px] font-black text-blue-600 px-3 py-1.5 bg-blue-50 rounded-lg border border-blue-100 uppercase tracking-widest">{user.company}</span>}
@@ -578,10 +574,10 @@ const App = () => {
                 </div>
             </header>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatCard icon={<ShieldCheck size={24}/>} color="blue" label="Tarif" value={user.tarif} />
+              <StatCard icon={<ShieldCheck size={24}/>} color="blue" label="Tarif" value={user.tarif || "Kein Tarif"} />
               <StatCard icon={<CreditCard size={24}/>} color="emerald" label="Monatspreis" value={`${totalBrutto} €`} />
               <StatCard icon={<Calendar size={24}/>} color="purple" label="Abrechnung" value={user.monat || "Aktuell"} />
-              <StatCard icon={<Clock size={24}/>} color="amber" label="Partnerschaft" value={new Date(user.startDatum).getFullYear()} />
+              <StatCard icon={<Clock size={24}/>} color="amber" label="Partnerschaft" value={user.startDatum ? new Date(user.startDatum).getFullYear() : new Date().getFullYear()} />
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-6">
@@ -605,11 +601,11 @@ const App = () => {
                     <ChevronRight className="text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
                   </div>
                 )}
-                {user.addons?.length > 0 && (
+                {(user.addons || []).length > 0 && (
                   <div className="bg-white rounded-[2rem] p-6 border border-slate-200 shadow-sm">
                     <h4 className="font-bold text-slate-900 mb-4 flex items-center gap-2 uppercase text-xs tracking-widest"><Coins size={16} className="text-amber-500" /> Gebuchte Extras</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {user.addons.map((addon, i) => (
+                      {(user.addons || []).map((addon, i) => (
                         <div key={i} className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100"><span className="text-sm font-semibold text-slate-700">{addon.name}</span><span className="text-sm font-bold text-slate-900">{addon.preis} €</span></div>
                       ))}
                     </div>
@@ -644,6 +640,22 @@ const App = () => {
         ) : renderContent()}
       </main>
       <footer className="max-w-6xl mx-auto p-8 text-center border-t mt-12 opacity-30"><p className="text-[9px] uppercase font-bold tracking-[0.2em]">&copy; MyDC OG &bull; High End Content Marketing</p></footer>
+    </div>
+  );
+};
+
+const StatCard = ({ icon, color, label, value }) => {
+  const colors = {
+    blue: 'bg-blue-50 text-blue-600 border-blue-100',
+    emerald: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+    purple: 'bg-purple-50 text-purple-600 border-purple-100',
+    amber: 'bg-amber-50 text-amber-600 border-amber-100'
+  };
+  return (
+    <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-md transition-all">
+      <div className={`p-3 rounded-2xl border ${colors[color]} w-fit mb-4`}>{icon}</div>
+      <p className="text-slate-400 text-[10px] uppercase font-black tracking-widest mb-1">{label}</p>
+      <h3 className="text-base font-bold text-slate-900 leading-tight">{value}</h3>
     </div>
   );
 };
