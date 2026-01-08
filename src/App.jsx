@@ -38,7 +38,8 @@ import {
   AlertCircle,
   FileCheck,
   TreeDeciduous,
-  AlertTriangle
+  AlertTriangle,
+  Send
 } from 'lucide-react';
 
 // --- KONFIGURATION ---
@@ -69,6 +70,16 @@ const TARIFF_INFO = {
 };
 
 const TARIFF_OPTIONS = Object.keys(TARIFF_INFO);
+
+const STRATEGY_OPTIONS = [
+  "Personal Brand Push",
+  "Product Push",
+  "AD Kampagnen",
+  "Test Reel Push",
+  "Organic Only Push",
+  "AD Only Push",
+  "Sonstige Vereinbarung"
+];
 
 const PLATFORMS = ["Instagram", "TikTok", "Facebook", "LinkedIn", "YouTube", "Pinterest"];
 const INVOICE_STATUS_OPTIONS = ["Bezahlt", "Offen", "Fällig"];
@@ -123,6 +134,7 @@ const App = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showDuePopup, setShowDuePopup] = useState(false); 
+  const [noteInput, setNoteInput] = useState(''); // State für Kundennote-Eingabe
   
   // State für Kunden
   const [customers, setCustomers] = useState({});
@@ -145,7 +157,7 @@ const App = () => {
           setError("Verbindung zur Datenbank fehlgeschlagen.");
         }
       } else {
-        const saved = localStorage.getItem('mydc_customers_v22'); // Version erhöht für Clean Start
+        const saved = localStorage.getItem('mydc_customers_v23'); // Version Key erhöht
         if (saved) {
             setCustomers(JSON.parse(saved));
         } else {
@@ -175,7 +187,9 @@ const App = () => {
                     invoiceHistory: [
                       { month: "Dezember 2023", status: "Bezahlt" },
                       { month: "November 2023", status: "Bezahlt" }
-                    ]
+                    ],
+                    enableNotes: true, // Default enabled for demo
+                    customerNotes: []
                 }
             });
         }
@@ -205,7 +219,9 @@ const App = () => {
     statusMessage: '',
     internalNotes: '',
     invoiceStatus: 'Bezahlt',
-    invoiceHistory: []
+    invoiceHistory: [],
+    enableNotes: false,
+    customerNotes: []
   });
 
   const [newAddon, setNewAddon] = useState({ name: '', preis: '' });
@@ -282,10 +298,35 @@ const App = () => {
             alert("Fehler beim Speichern in der Cloud: " + err.message);
         }
     } else {
-        localStorage.setItem('mydc_customers_v22', JSON.stringify(newCustomers));
+        localStorage.setItem('mydc_customers_v23', JSON.stringify(newCustomers));
     }
     
     resetForm();
+  };
+
+  const submitCustomerNote = async () => {
+      if (!noteInput.trim()) return;
+
+      const newNote = {
+          text: noteInput,
+          date: new Date().toISOString()
+      };
+
+      const updatedUser = { 
+          ...user, 
+          customerNotes: [newNote, ...(user.customerNotes || [])] 
+      };
+
+      setUser(updatedUser);
+      const newCustomers = { ...customers, [user.id]: updatedUser };
+      setCustomers(newCustomers);
+      setNoteInput('');
+
+      if (db) {
+          await setDoc(doc(db, "customers", user.id), updatedUser);
+      } else {
+          localStorage.setItem('mydc_customers_v23', JSON.stringify(newCustomers));
+      }
   };
 
   const deleteCustomerData = async (id) => {
@@ -297,7 +338,7 @@ const App = () => {
           if (db) {
               await deleteDoc(doc(db, "customers", id));
           } else {
-              localStorage.setItem('mydc_customers_v22', JSON.stringify(newCustomers));
+              localStorage.setItem('mydc_customers_v23', JSON.stringify(newCustomers));
           }
       }
   };
@@ -311,7 +352,7 @@ const App = () => {
         managedAccounts: [], preis: '', addons: [], 
         startDatum: new Date().toISOString().split('T')[0], status: 'Aktiv', 
         nextAppointment: '', contentFocus: '', preparationInfo: '', statusMessage: '', internalNotes: '',
-        invoiceStatus: 'Bezahlt', invoiceHistory: []
+        invoiceStatus: 'Bezahlt', invoiceHistory: [], enableNotes: false, customerNotes: []
       });
     setNewAddon({ name: '', preis: '' });
     setNewHistoryItem({ month: '', status: 'Bezahlt' });
@@ -359,6 +400,12 @@ const App = () => {
           tarif: newTariff,
           tarifDescription: TARIFF_INFO[newTariff] || ""
       });
+  };
+
+  const formatDateTime = (dateTimeStr) => {
+    if (!dateTimeStr) return "Kein Termin vereinbart";
+    const dt = new Date(dateTimeStr);
+    return dt.toLocaleString('de-DE', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + " Uhr";
   };
 
   const getStatusColor = (status) => {
@@ -556,6 +603,40 @@ const App = () => {
                         ))}
                     </div>
                 </div>
+
+                {/* --- CUSTOMER NOTES TOGGLE --- */}
+                <div className="p-3 bg-white border border-slate-200 rounded-xl">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={editCustomer.enableNotes || false} 
+                      onChange={e => setEditCustomer({...editCustomer, enableNotes: e.target.checked})} 
+                      className="accent-slate-900 w-4 h-4"
+                    />
+                    <span className="text-xs font-bold text-slate-700 flex items-center gap-1">
+                      <Lightbulb size={14} className="text-yellow-500"/> Kunden-Notizen Box aktivieren
+                    </span>
+                  </label>
+                  
+                  {editCustomer.customerNotes && editCustomer.customerNotes.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-slate-100">
+                      <h5 className="font-bold text-slate-400 text-[10px] uppercase mb-2 flex items-center gap-1">
+                         <MessageSquare size={10} /> Eingereichte Ideen vom Kunden
+                      </h5>
+                      <div className="space-y-2 max-h-32 overflow-y-auto custom-scrollbar">
+                        {editCustomer.customerNotes.map((note, idx) => (
+                          <div key={idx} className="bg-slate-50 p-2 rounded-lg text-xs border border-slate-100">
+                            <div className="flex justify-between items-center mb-1">
+                                <span className="text-[9px] font-bold text-slate-400">{new Date(note.date).toLocaleString()}</span>
+                            </div>
+                            <p className="text-slate-800 leading-snug">{note.text}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 space-y-3">
                     <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Dreh-Terminierung</p>
                     <input className="w-full p-2.5 border border-blue-200 rounded-xl bg-white text-xs" type="datetime-local" value={editCustomer.nextAppointment} onChange={e => setEditCustomer({...editCustomer, nextAppointment: e.target.value})} />
@@ -586,9 +667,10 @@ const App = () => {
                         <div className="flex gap-3 mt-2">
                             {isValidDate(data.nextAppointment) && <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">Dreh: {new Date(data.nextAppointment).toLocaleDateString()}</span>}
                             {data.invoiceStatus && <span className={`text-[9px] font-bold px-2 py-1 rounded-md border ${getStatusColor(data.invoiceStatus)}`}>{data.invoiceStatus}</span>}
+                            {data.customerNotes && data.customerNotes.length > 0 && <span className="text-[9px] font-bold text-yellow-600 bg-yellow-50 px-2 py-1 rounded-md flex items-center gap-1"><Lightbulb size={8}/> {data.customerNotes.length} Ideen</span>}
                         </div>
                     </div>
-                    <div className="flex gap-2"><button onClick={() => setEditCustomer({id, ...data, addons: data.addons || [], strategies: data.strategies || [], managedAccounts: data.managedAccounts || [], invoiceHistory: data.invoiceHistory || [], preparationInfo: data.preparationInfo || '', creativeFocus: data.creativeFocus || 3, statusOrganic: data.statusOrganic || false, statusPaid: data.statusPaid || false, tarifDescription: data.tarifDescription || TARIFF_INFO[data.tarif] || ""})} className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:bg-blue-600 hover:text-white transition-all"><Settings size={20}/></button><button onClick={() => deleteCustomerData(id)} className="p-3 bg-slate-50 text-slate-300 rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all"><Trash2 size={20}/></button></div>
+                    <div className="flex gap-2"><button onClick={() => setEditCustomer({id, ...data, addons: data.addons || [], strategies: data.strategies || [], managedAccounts: data.managedAccounts || [], invoiceHistory: data.invoiceHistory || [], preparationInfo: data.preparationInfo || '', creativeFocus: data.creativeFocus || 3, statusOrganic: data.statusOrganic || false, statusPaid: data.statusPaid || false, tarifDescription: data.tarifDescription || TARIFF_INFO[data.tarif] || "", enableNotes: data.enableNotes || false, customerNotes: data.customerNotes || []})} className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:bg-blue-600 hover:text-white transition-all"><Settings size={20}/></button><button onClick={() => deleteCustomerData(id)} className="p-3 bg-slate-50 text-slate-300 rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all"><Trash2 size={20}/></button></div>
                 </div>
                 ))}
             </div>
@@ -814,6 +896,46 @@ const App = () => {
             </div>
           </div>
         );
+
+      case 'notes':
+        return (
+          <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+             <div className="flex items-center gap-4 border-b pb-6">
+               <div className="w-12 h-12 bg-yellow-50 text-yellow-600 rounded-2xl flex items-center justify-center"><Lightbulb size={24}/></div>
+               <div><h3 className="text-2xl font-bold text-slate-900">Meine Content-Ideen</h3><p className="text-slate-500 text-sm">Sammeln Sie hier Ihre Geistesblitze.</p></div>
+             </div>
+
+             <div className="flex gap-2">
+                 <input 
+                    type="text" 
+                    className="flex-1 p-4 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-slate-900 transition-all"
+                    placeholder="Neue Idee eingeben..." 
+                    value={noteInput}
+                    onChange={(e) => setNoteInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && submitCustomerNote()}
+                 />
+                 <button onClick={submitCustomerNote} className="bg-slate-900 text-white px-6 rounded-2xl hover:bg-slate-700 transition-all active:scale-95"><Send size={20}/></button>
+             </div>
+
+             <div className="space-y-4">
+                 {(user.customerNotes && user.customerNotes.length > 0) ? (
+                     user.customerNotes.map((note, i) => (
+                         <div key={i} className="p-6 bg-slate-50 rounded-3xl border border-slate-100 hover:border-slate-200 transition-colors">
+                             <div className="flex justify-between items-center mb-2">
+                                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{new Date(note.date).toLocaleString()}</span>
+                             </div>
+                             <p className="text-slate-800 font-medium">{note.text}</p>
+                         </div>
+                     ))
+                 ) : (
+                     <div className="text-center py-12">
+                         <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300"><Lightbulb size={32}/></div>
+                         <p className="text-slate-400 italic">Noch keine Ideen festgehalten.</p>
+                     </div>
+                 )}
+             </div>
+          </div>
+        );
     }
   };
 
@@ -942,6 +1064,9 @@ const App = () => {
                         <button onClick={() => setActiveTab('appointments')} className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-all active:scale-95"><span className="text-sm font-bold">Content & Termine</span><Camera size={16} className="text-slate-400"/></button>
                         <button onClick={() => setActiveTab('strategy')} className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-all active:scale-95"><span className="text-sm font-bold">Strategie-Plan</span><Target size={16} className="text-slate-400"/></button>
                         <button onClick={() => setActiveTab('profile')} className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-all active:scale-95"><span className="text-sm font-bold">Mein Profil</span><User size={16} className="text-slate-400"/></button>
+                        {user.enableNotes && (
+                            <button onClick={() => setActiveTab('notes')} className="w-full flex items-center justify-between p-4 rounded-2xl bg-yellow-50 hover:bg-yellow-100 transition-all active:scale-95 border border-yellow-200"><span className="text-sm font-bold text-yellow-700">Meine Ideen</span><Lightbulb size={16} className="text-yellow-600"/></button>
+                        )}
                     </div>
                 </div>
               </div>
