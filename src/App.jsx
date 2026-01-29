@@ -675,6 +675,7 @@ const App = () => {
                         <div className="flex gap-3 mt-2">
                             {isValidDate(data.nextAppointment) && <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">Dreh: {new Date(data.nextAppointment).toLocaleDateString()}</span>}
                             {data.invoiceStatus && <span className={`text-[9px] font-bold px-2 py-1 rounded-md border ${getStatusColor(data.invoiceStatus)}`}>{data.invoiceStatus}</span>}
+                            {data.customerNotes && data.customerNotes.length > 0 && <span className="text-[9px] font-bold text-yellow-600 bg-yellow-50 px-2 py-1 rounded-md flex items-center gap-1"><Lightbulb size={8}/> {data.customerNotes.length} Ideen</span>}
                         </div>
                     </div>
                     <div className="flex gap-2"><button onClick={() => setEditCustomer({id, ...data, addons: data.addons || [], strategies: data.strategies || [], managedAccounts: data.managedAccounts || [], invoiceHistory: data.invoiceHistory || [], preparationInfo: data.preparationInfo || '', creativeFocus: data.creativeFocus || 3, statusOrganic: data.statusOrganic || false, statusPaid: data.statusPaid || false, tarifDescription: data.tarifDescription || TARIFF_INFO[data.tarif] || "", enableNotes: data.enableNotes || false, customerNotes: data.customerNotes || []})} className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:bg-blue-600 hover:text-white transition-all"><Settings size={20}/></button><button onClick={() => deleteCustomerData(id)} className="p-3 bg-slate-50 text-slate-300 rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all"><Trash2 size={20}/></button></div>
@@ -809,7 +810,7 @@ const App = () => {
                     {/* Termin verschieben Button (Integriert) */}
                     <div className="flex justify-between items-center pt-4 border-t border-white/10">
                         <span className="text-xs font-medium text-emerald-100">Termin ändern?</span>
-                        <a href="mailto:office@pelk-media.at?subject=Terminverschiebung" className="bg-white text-emerald-800 px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-50 transition-all flex items-center gap-2 shadow-sm">
+                        <a href="mailto:kontakt@pelk.at?subject=Terminverschiebung" className="bg-white text-emerald-800 px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-50 transition-all flex items-center gap-2 shadow-sm">
                             <Mail size={14}/> Kontaktieren
                         </a>
                     </div>
@@ -836,7 +837,7 @@ const App = () => {
                     Aktueller Tarif <CheckCircle2 size={16}/>
                   </button>
               ) : (
-                  <a href={`mailto:office@pelk-media.at?subject=Tarifwechsel%20zu%20${viewTariff}`} className="bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-slate-800 transition-all flex items-center gap-2 shadow-lg hover:-translate-y-0.5">
+                  <a href={`mailto:kontakt@pelk.at?subject=Ich%20m%C3%B6chte%20meinen%20Tarif%20wechseln%20auf%20${viewTariff}`} className="bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-slate-800 transition-all flex items-center gap-2 shadow-lg hover:-translate-y-0.5">
                     Wechseln zu {viewTariff} <ArrowRight size={16}/>
                   </a>
               )}
@@ -1024,7 +1025,7 @@ const App = () => {
                   <div className="relative z-10">
                     <div className="flex items-center gap-2 mb-4 text-blue-400"><MessageSquare size={16}/><h3 className="text-xl font-bold uppercase tracking-tight">Status & News</h3></div>
                     <p className="text-slate-300 text-lg md:text-xl leading-relaxed mb-8 font-medium">{user.statusMessage || "Wir analysieren gerade die neuesten Trends für Ihren Account. In Kürze finden Sie hier neue Updates!"}</p>
-                    <div className="flex gap-4"><a href="mailto:kontakt@pelk.at" className="bg-white text-slate-900 px-6 py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-all">Support</a></div>
+                    <div className="flex gap-4"><a href="mailto:kontakt@pelk.at?subject=Support%20Anfrage%20-%20Ich%20brauche%20Hilfe%20bei.." className="bg-white text-slate-900 px-6 py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-all">Support</a></div>
                   </div>
                   <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-blue-600 rounded-full blur-[100px] opacity-20"></div>
                 </div>
@@ -1061,7 +1062,7 @@ const App = () => {
                             <li className="text-xs font-bold text-slate-800 flex items-center gap-2"><CheckCircle2 size={12} className="text-amber-600"/> Business Meta Abo (Verifiziert)</li>
                             <li className="text-xs font-bold text-slate-800 flex items-center gap-2"><CheckCircle2 size={12} className="text-amber-600"/> Community Management</li>
                         </ul>
-                        <a href="mailto:kontakt@pelk.at?subject=Anfrage%20Zusatzoptionen" className="w-full block text-center bg-slate-900 text-white py-3 rounded-xl text-xs font-bold hover:bg-slate-800 transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"><Mail size={14}/> Jetzt anfragen</a>
+                        <a href="mailto:kontakt@pelk.at?subject=Ich%20will%20mein%20Business%20mit%20folgenden%20Boosten..." className="w-full block text-center bg-slate-900 text-white py-3 rounded-xl text-xs font-bold hover:bg-slate-800 transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"><Mail size={14}/> Jetzt anfragen</a>
                     </div>
                     <div className="absolute top-[-10%] right-[-10%] w-32 h-32 bg-amber-400 rounded-full blur-[50px] opacity-30"></div>
                 </div>
