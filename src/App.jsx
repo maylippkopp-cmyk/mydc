@@ -108,14 +108,14 @@ const LogoImage = ({ className, style }) => {
   if (imgError) {
     return (
       <div className={`${className} bg-slate-900 flex items-center justify-center text-white font-bold text-xs uppercase shadow-lg`} style={style}>
-        MyDC
+        PELK
       </div>
     );
   }
   return (
     <img 
       src={LOGO_SRC} 
-      alt="MyDC Logo" 
+      alt="P.E.L.K. Media Logo" 
       className={`${className} object-contain`} 
       style={style}
       onError={() => setImgError(true)}
@@ -134,11 +134,22 @@ const App = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showDuePopup, setShowDuePopup] = useState(false); 
-  const [noteInput, setNoteInput] = useState(''); // State für Kundennote-Eingabe
+  const [noteInput, setNoteInput] = useState(''); 
   
   // State für Kunden
   const [customers, setCustomers] = useState({});
   const [isFirebaseReady, setIsFirebaseReady] = useState(false);
+
+  // --- AUTOMATISCHE WEITERLEITUNG ---
+  useEffect(() => {
+    // Prüft, ob der Nutzer auf der alten Domain ist
+    if (window.location.hostname === 'mydc-omega.vercel.app') {
+      // HIER DEINE NEUE DOMAIN EINTRAGEN (ohne https://)
+      // Beispiel: window.location.href = 'https://pelk-media.vercel.app';
+      // Entferne die zwei Schrägstriche am Anfang der nächsten Zeile, wenn du die Domain hast:
+      // window.location.href = 'https://DEINE-NEUE-PELK-DOMAIN.vercel.app'; 
+    }
+  }, []);
 
   // Daten laden (Firebase oder Fallback)
   useEffect(() => {
@@ -157,7 +168,7 @@ const App = () => {
           setError("Verbindung zur Datenbank fehlgeschlagen.");
         }
       } else {
-        const saved = localStorage.getItem('mydc_customers_v23'); // Version Key erhöht
+        const saved = localStorage.getItem('pelk_customers_v1'); // Version Key für neues Branding
         if (saved) {
             setCustomers(JSON.parse(saved));
         } else {
@@ -188,7 +199,7 @@ const App = () => {
                       { month: "Dezember 2023", status: "Bezahlt" },
                       { month: "November 2023", status: "Bezahlt" }
                     ],
-                    enableNotes: true, // Default enabled for demo
+                    enableNotes: true, 
                     customerNotes: []
                 }
             });
@@ -236,7 +247,8 @@ const App = () => {
       const inputId = customerNumber.trim();
       const inputPw = password.trim();
 
-      if (inputId === 'ADMIN-MYDC') {
+      // Geänderter Admin Login Name für P.E.L.K.
+      if (inputId === 'ADMIN-PELK') {
         if (inputPw === ADMIN_PASSWORD) {
           setIsAdmin(true);
           setUser({ name: 'Administrator' });
@@ -298,7 +310,7 @@ const App = () => {
             alert("Fehler beim Speichern in der Cloud: " + err.message);
         }
     } else {
-        localStorage.setItem('mydc_customers_v23', JSON.stringify(newCustomers));
+        localStorage.setItem('pelk_customers_v1', JSON.stringify(newCustomers));
     }
     
     resetForm();
@@ -325,7 +337,7 @@ const App = () => {
       if (db) {
           await setDoc(doc(db, "customers", user.id), updatedUser);
       } else {
-          localStorage.setItem('mydc_customers_v23', JSON.stringify(newCustomers));
+          localStorage.setItem('pelk_customers_v1', JSON.stringify(newCustomers));
       }
   };
 
@@ -338,7 +350,7 @@ const App = () => {
           if (db) {
               await deleteDoc(doc(db, "customers", id));
           } else {
-              localStorage.setItem('mydc_customers_v23', JSON.stringify(newCustomers));
+              localStorage.setItem('pelk_customers_v1', JSON.stringify(newCustomers));
           }
       }
   };
@@ -433,7 +445,7 @@ const App = () => {
           <div className="flex flex-col items-center mb-8">
             <LogoImage className="w-32 h-32 rounded-2xl mb-4" />
             <h1 className="text-2xl font-bold">Login</h1>
-            <p className="text-slate-400 text-sm mt-2">Willkommen bei MyDC OG</p>
+            <p className="text-slate-400 text-sm mt-2">Willkommen bei P.E.L.K. - Media</p>
             {!db && <p className="text-[10px] text-red-400 mt-2 bg-red-50 p-2 rounded">Hinweis: Demo-Modus (keine Cloud-Verbindung)</p>}
           </div>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -455,7 +467,7 @@ const App = () => {
           </form>
           <div className="mt-8 text-center border-t pt-6 border-slate-100">
             <p className="text-xs text-slate-400">Probleme beim Login?</p>
-            <a href="mailto:office@my-dc.at" className="text-sm font-bold text-slate-900 hover:text-blue-600 transition-colors">office@my-dc.at</a>
+            <a href="mailto:kontakt@pelk.at" className="text-sm font-bold text-slate-900 hover:text-blue-600 transition-colors">kontakt@pelk.at</a>
           </div>
         </div>
       </div>
@@ -466,7 +478,7 @@ const App = () => {
     return (
       <div className="min-h-screen bg-slate-100 font-sans pb-10 text-slate-800">
         <nav className="bg-white border-b p-4 sticky top-0 z-20 flex justify-between items-center px-4 md:px-8 shadow-sm">
-          <div className="flex items-center gap-2 font-bold text-lg"><Settings size={20}/> MyDC Admin {isFirebaseReady && <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Cloud Aktiv</span>}</div>
+          <div className="flex items-center gap-2 font-bold text-lg"><Settings size={20}/> P.E.L.K. Admin {isFirebaseReady && <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Cloud Aktiv</span>}</div>
           <button onClick={handleLogout} className="text-slate-500 flex items-center gap-1 font-medium hover:text-red-500 transition-colors"><LogOut size={18}/> Logout</button>
         </nav>
         <main className="max-w-7xl mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -802,7 +814,7 @@ const App = () => {
                     {/* Termin verschieben Button (Integriert) */}
                     <div className="flex justify-between items-center pt-4 border-t border-white/10">
                         <span className="text-xs font-medium text-emerald-100">Termin ändern?</span>
-                        <a href="mailto:office@my-dc.at?subject=Terminverschiebung" className="bg-white text-emerald-800 px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-50 transition-all flex items-center gap-2 shadow-sm">
+                        <a href="mailto:office@pelk-media.at?subject=Terminverschiebung" className="bg-white text-emerald-800 px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-50 transition-all flex items-center gap-2 shadow-sm">
                             <Mail size={14}/> Kontaktieren
                         </a>
                     </div>
@@ -829,7 +841,7 @@ const App = () => {
                     Aktueller Tarif <CheckCircle2 size={16}/>
                   </button>
               ) : (
-                  <a href={`mailto:office@my-dc.at?subject=Tarifwechsel%20zu%20${viewTariff}`} className="bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-slate-800 transition-all flex items-center gap-2 shadow-lg hover:-translate-y-0.5">
+                  <a href={`mailto:office@pelk-media.at?subject=Tarifwechsel%20zu%20${viewTariff}`} className="bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-slate-800 transition-all flex items-center gap-2 shadow-lg hover:-translate-y-0.5">
                     Wechseln zu {viewTariff} <ArrowRight size={16}/>
                   </a>
               )}
@@ -1017,7 +1029,7 @@ const App = () => {
                   <div className="relative z-10">
                     <div className="flex items-center gap-2 mb-4 text-blue-400"><MessageSquare size={16}/><h3 className="text-xl font-bold uppercase tracking-tight">Status & News</h3></div>
                     <p className="text-slate-300 text-lg md:text-xl leading-relaxed mb-8 font-medium">{user.statusMessage || "Wir analysieren gerade die neuesten Trends für Ihren Account. In Kürze finden Sie hier neue Updates!"}</p>
-                    <div className="flex gap-4"><a href="mailto:office@my-dc.at" className="bg-white text-slate-900 px-6 py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-all">Support</a></div>
+                    <div className="flex gap-4"><a href="mailto:office@pelk-media.at" className="bg-white text-slate-900 px-6 py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-all">Support</a></div>
                   </div>
                   <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-blue-600 rounded-full blur-[100px] opacity-20"></div>
                 </div>
@@ -1027,7 +1039,7 @@ const App = () => {
                       <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform"><Camera size={24}/></div>
                       <div>
                         <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Nächster Drehtermin</p>
-                        <h4 className="text-lg font-bold text-slate-900">{new Date(user.nextAppointment).toLocaleString('de-DE', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' })} Uhr</h4>
+                        <h4 className="text-lg font-bold text-slate-900">{new Date(user.nextAppointment).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' })} Uhr</h4>
                       </div>
                     </div>
                     <ChevronRight className="text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
@@ -1054,7 +1066,7 @@ const App = () => {
                             <li className="text-xs font-bold text-slate-800 flex items-center gap-2"><CheckCircle2 size={12} className="text-amber-600"/> Business Meta Abo (Verifiziert)</li>
                             <li className="text-xs font-bold text-slate-800 flex items-center gap-2"><CheckCircle2 size={12} className="text-amber-600"/> Community Management</li>
                         </ul>
-                        <a href="mailto:office@my-dc.at?subject=Anfrage%20Zusatzoptionen" className="w-full block text-center bg-slate-900 text-white py-3 rounded-xl text-xs font-bold hover:bg-slate-800 transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"><Mail size={14}/> Jetzt anfragen</a>
+                        <a href="mailto:office@pelk-media.at?subject=Anfrage%20Zusatzoptionen" className="w-full block text-center bg-slate-900 text-white py-3 rounded-xl text-xs font-bold hover:bg-slate-800 transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"><Mail size={14}/> Jetzt anfragen</a>
                     </div>
                     <div className="absolute top-[-10%] right-[-10%] w-32 h-32 bg-amber-400 rounded-full blur-[50px] opacity-30"></div>
                 </div>
@@ -1076,7 +1088,7 @@ const App = () => {
       </main>
       <footer className="max-w-6xl mx-auto p-8 text-center border-t mt-12 opacity-50 text-[10px] text-slate-500 font-bold uppercase tracking-widest flex flex-col gap-2">
           <p>&copy; MyDC OG &bull; Your Media Marketing</p>
-          <a href="https://www.my-dc.at/impressum" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 transition-colors underline underline-offset-4">Impressum</a>
+          <a href="https://www.pelk-media.at/impressum" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 transition-colors underline underline-offset-4">Impressum</a>
       </footer>
     </div>
   );
