@@ -147,7 +147,7 @@ const App = () => {
       // HIER DEINE NEUE DOMAIN EINTRAGEN (ohne https://)
       // Beispiel: window.location.href = 'https://pelk-media.vercel.app';
       // Entferne die zwei Schrägstriche am Anfang der nächsten Zeile, wenn du die Domain hast:
-      // window.location.href = 'pelk-media.vercel.app'; 
+      window.location.href = 'pelk-media.vercel.app'; 
     }
   }, []);
 
