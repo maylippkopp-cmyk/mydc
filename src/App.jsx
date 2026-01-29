@@ -142,12 +142,8 @@ const App = () => {
 
   // --- AUTOMATISCHE WEITERLEITUNG ---
   useEffect(() => {
-    // Prüft, ob der Nutzer auf der alten Domain ist
     if (window.location.hostname === 'mydc-omega.vercel.app') {
-      // HIER DEINE NEUE DOMAIN EINTRAGEN (ohne https://)
-      // Beispiel: window.location.href = 'https://pelk-media.vercel.app';
-      // Entferne die zwei Schrägstriche am Anfang der nächsten Zeile, wenn du die Domain hast:
-      window.location.href = 'pelk-media.vercel.app'; 
+      // window.location.href = 'https://pelk-media.vercel.app'; 
     }
   }, []);
 
@@ -679,7 +675,6 @@ const App = () => {
                         <div className="flex gap-3 mt-2">
                             {isValidDate(data.nextAppointment) && <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">Dreh: {new Date(data.nextAppointment).toLocaleDateString()}</span>}
                             {data.invoiceStatus && <span className={`text-[9px] font-bold px-2 py-1 rounded-md border ${getStatusColor(data.invoiceStatus)}`}>{data.invoiceStatus}</span>}
-                            {data.customerNotes && data.customerNotes.length > 0 && <span className="text-[9px] font-bold text-yellow-600 bg-yellow-50 px-2 py-1 rounded-md flex items-center gap-1"><Lightbulb size={8}/> {data.customerNotes.length} Ideen</span>}
                         </div>
                     </div>
                     <div className="flex gap-2"><button onClick={() => setEditCustomer({id, ...data, addons: data.addons || [], strategies: data.strategies || [], managedAccounts: data.managedAccounts || [], invoiceHistory: data.invoiceHistory || [], preparationInfo: data.preparationInfo || '', creativeFocus: data.creativeFocus || 3, statusOrganic: data.statusOrganic || false, statusPaid: data.statusPaid || false, tarifDescription: data.tarifDescription || TARIFF_INFO[data.tarif] || "", enableNotes: data.enableNotes || false, customerNotes: data.customerNotes || []})} className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:bg-blue-600 hover:text-white transition-all"><Settings size={20}/></button><button onClick={() => deleteCustomerData(id)} className="p-3 bg-slate-50 text-slate-300 rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all"><Trash2 size={20}/></button></div>
@@ -976,8 +971,8 @@ const App = () => {
 
       <nav className="bg-white border-b px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-20 shadow-sm">
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('overview')}>
-          <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-all"><span className="text-white font-bold text-xs">MyDC</span></div>
-          <div className="flex flex-col"><span className="font-bold text-lg tracking-tight leading-none">MyDC Portal</span><span className="text-[8px] font-black uppercase text-slate-400 tracking-widest mt-0.5">Your Media Marketing</span></div>
+          <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-all"><span className="text-white font-bold text-xs">PELK</span></div>
+          <div className="flex flex-col"><span className="font-bold text-lg tracking-tight leading-none">P.E.L.K. - Media Portal</span><span className="text-[8px] font-black uppercase text-slate-400 tracking-widest mt-0.5">Your Media Marketing</span></div>
         </div>
         <button onClick={() => setUser(null)} className="flex items-center gap-2 text-slate-500 text-sm font-bold bg-slate-50 px-3 py-2 rounded-xl hover:bg-red-50 hover:text-red-500 transition-all active:scale-95"><LogOut size={18} /> <span className="hidden md:inline">Abmelden</span></button>
       </nav>
@@ -997,7 +992,7 @@ const App = () => {
                 </div>
                 <div className="text-right flex flex-col items-end">
                     <LogoImage className="w-16 h-16 rounded-xl shadow-lg mb-2" />
-                    <p className="text-xs text-slate-500 font-medium max-w-xs leading-relaxed">Herzlich willkommen in Ihrem persönlichen <br/><span className="text-slate-900 font-bold">My DC Social Media Dashboard</span></p>
+                    <p className="text-xs text-slate-500 font-medium max-w-xs leading-relaxed">Herzlich willkommen in Ihrem persönlichen <br/><span className="text-slate-900 font-bold">P.E.L.K. - Media Social Media Dashboard</span></p>
                 </div>
             </header>
             
@@ -1029,7 +1024,7 @@ const App = () => {
                   <div className="relative z-10">
                     <div className="flex items-center gap-2 mb-4 text-blue-400"><MessageSquare size={16}/><h3 className="text-xl font-bold uppercase tracking-tight">Status & News</h3></div>
                     <p className="text-slate-300 text-lg md:text-xl leading-relaxed mb-8 font-medium">{user.statusMessage || "Wir analysieren gerade die neuesten Trends für Ihren Account. In Kürze finden Sie hier neue Updates!"}</p>
-                    <div className="flex gap-4"><a href="mailto:office@pelk-media.at" className="bg-white text-slate-900 px-6 py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-all">Support</a></div>
+                    <div className="flex gap-4"><a href="mailto:kontakt@pelk.at" className="bg-white text-slate-900 px-6 py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-all">Support</a></div>
                   </div>
                   <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-blue-600 rounded-full blur-[100px] opacity-20"></div>
                 </div>
@@ -1066,7 +1061,7 @@ const App = () => {
                             <li className="text-xs font-bold text-slate-800 flex items-center gap-2"><CheckCircle2 size={12} className="text-amber-600"/> Business Meta Abo (Verifiziert)</li>
                             <li className="text-xs font-bold text-slate-800 flex items-center gap-2"><CheckCircle2 size={12} className="text-amber-600"/> Community Management</li>
                         </ul>
-                        <a href="mailto:office@pelk-media.at?subject=Anfrage%20Zusatzoptionen" className="w-full block text-center bg-slate-900 text-white py-3 rounded-xl text-xs font-bold hover:bg-slate-800 transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"><Mail size={14}/> Jetzt anfragen</a>
+                        <a href="mailto:kontakt@pelk.at?subject=Anfrage%20Zusatzoptionen" className="w-full block text-center bg-slate-900 text-white py-3 rounded-xl text-xs font-bold hover:bg-slate-800 transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"><Mail size={14}/> Jetzt anfragen</a>
                     </div>
                     <div className="absolute top-[-10%] right-[-10%] w-32 h-32 bg-amber-400 rounded-full blur-[50px] opacity-30"></div>
                 </div>
@@ -1087,8 +1082,8 @@ const App = () => {
         ) : renderContent()}
       </main>
       <footer className="max-w-6xl mx-auto p-8 text-center border-t mt-12 opacity-50 text-[10px] text-slate-500 font-bold uppercase tracking-widest flex flex-col gap-2">
-          <p>&copy; MyDC OG &bull; Your Media Marketing</p>
-          <a href="https://www.pelk-media.at/impressum" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 transition-colors underline underline-offset-4">Impressum</a>
+          <p>&copy; P.E.L.K. - Media</p>
+          <a href="https://pelk.at/impressum.php" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 transition-colors underline underline-offset-4">Impressum</a>
       </footer>
     </div>
   );
